@@ -2,6 +2,7 @@
   "name": "patientflow-backend",
   "version": "1.0.0",
   "main": "src/server.js",
+  "type": "module",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
@@ -12,6 +13,7 @@
   "license": "ISC",
   "description": "Backend API for PatientFlow",
   "dependencies": {
+    "axios": "^1.13.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
