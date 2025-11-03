@@ -1,10 +1,13 @@
+import { useState } from "react";
 import type { Patient } from "../types/patient";
+import patientApi from "../services/api";
 
 interface PatientCardProps {
   patient: Patient;
   onEdit: () => void;
   onDelete: () => void;
   onPredict: () => void;
+  onUpdate: () => void;
 }
 
 export default function PatientCard({
@@ -12,7 +15,11 @@ export default function PatientCard({
   onEdit,
   onDelete,
   onPredict,
+  onUpdate,
 }: PatientCardProps) {
+  const [showStatusMenu, setShowStatusMenu] = useState(false);
+  const [updating, setUpdating] = useState(false);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "admitted":
@@ -36,6 +43,28 @@ export default function PatientCard({
         return "Discharged";
       default:
         return status;
+    }
+  };
+
+  const handleStatusChange = async (newStatus: string) => {
+    setUpdating(true);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const updateData: any = { status: newStatus };
+
+      // If marking as discharged, set discharge date
+      if (newStatus === "discharged" && !patient.dischargeDate) {
+        updateData.dischargeDate = new Date().toISOString();
+      }
+
+      await patientApi.updatePatient(patient._id, updateData);
+      setShowStatusMenu(false);
+      onUpdate();
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert("Failed to update status");
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -64,13 +93,41 @@ export default function PatientCard({
           </h3>
           <p className="text-sm text-gray-500">{patient._id}</p>
         </div>
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
-            patient.status
-          )}`}
-        >
-          {getStatusLabel(patient.status)}
-        </span>
+        <div className="relative">
+          <button
+            onClick={() => setShowStatusMenu(!showStatusMenu)}
+            disabled={updating}
+            className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
+              patient.status
+            )} cursor-pointer hover:opacity-80 transition`}
+          >
+            {updating ? "Updating..." : getStatusLabel(patient.status)}
+          </button>
+
+          {/* Status dropdown menu */}
+          {showStatusMenu && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+              <button
+                onClick={() => handleStatusChange("admitted")}
+                className="w-full text-left px-4 py-2 hover:bg-yellow-50 text-sm rounded-t-lg"
+              >
+                ✓ Admitted
+              </button>
+              <button
+                onClick={() => handleStatusChange("ready_for_review")}
+                className="w-full text-left px-4 py-2 hover:bg-green-50 text-sm"
+              >
+                ✓ Ready for Review
+              </button>
+              <button
+                onClick={() => handleStatusChange("discharged")}
+                className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm rounded-b-lg"
+              >
+                ✓ Discharged
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Patient Info */}
@@ -100,6 +157,16 @@ export default function PatientCard({
           </p>
         </div>
       </div>
+
+      {/* Discharge Date (if discharged) */}
+      {patient.dischargeDate && (
+        <div className="bg-gray-50 rounded-lg p-3 mb-4">
+          <p className="text-xs text-gray-500">Discharge Date</p>
+          <p className="text-sm font-medium text-gray-800">
+            {formatDate(patient.dischargeDate)}
+          </p>
+        </div>
+      )}
 
       {/* Vital Signs */}
       <div className="bg-gray-50 rounded-lg p-3 mb-4">

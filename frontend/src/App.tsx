@@ -148,6 +148,10 @@ function App() {
             onEdit={handleEditPatient}
             onDelete={handleDeletePatient}
             onPredict={handlePredictDischarge}
+            onUpdate={() => {
+              fetchPatients();
+              fetchStats();
+            }}
           />
         )}
 

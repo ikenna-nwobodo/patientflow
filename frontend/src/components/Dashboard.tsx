@@ -14,25 +14,23 @@ export default function Dashboard({ stats }: DashboardProps) {
     },
     {
       label: "Currently Admitted",
-      value: stats.admittedPatients,
+      value: stats.admittedCount,
       color: "bg-yellow-500",
       icon: "🏥",
     },
     {
       label: "Ready for Review",
-      value: stats.readyForReviewPatients,
+      value: stats.readyForReview,
       color: "bg-green-500",
       icon: "✅",
     },
     {
       label: "Discharged",
-      value: stats.dischargedPatients,
+      value: stats.dischargedCount,
       color: "bg-gray-500",
       icon: "🏠",
     },
   ];
-
-  console.log(stats.averageLengthOfStay);
 
   return (
     <div className="mb-8">
@@ -59,7 +57,7 @@ export default function Dashboard({ stats }: DashboardProps) {
           <div>
             <p className="text-sm text-gray-600 mb-1">Average Length of Stay</p>
             <p className="text-3xl font-bold text-gray-800">
-              {stats.averageLengthOfStay} days
+              {stats.avgLengthOfStay} days
             </p>
           </div>
           <div className="bg-purple-500 w-12 h-12 rounded-full flex items-center justify-center text-2xl">

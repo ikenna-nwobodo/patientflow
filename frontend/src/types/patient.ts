@@ -23,10 +23,10 @@ export interface Patient {
 
 export interface Stats {
   totalPatients: number;
-  admittedPatients: number;
-  readyForReviewPatients: number;
-  dischargedPatients: number;
-  averageLengthOfStay: number;
+  admittedCount: number;
+  readyForReview: number;
+  dischargedCount: number;
+  avgLengthOfStay: number;
 }
 
 export interface PatientFormData {

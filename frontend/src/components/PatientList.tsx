@@ -6,6 +6,7 @@ interface PatientListProps {
   onEdit: (patient: Patient) => void;
   onDelete: (id: string) => void;
   onPredict: (id: string) => void;
+  onUpdate: () => void;
 }
 
 export default function PatientList({
@@ -13,6 +14,7 @@ export default function PatientList({
   onEdit,
   onDelete,
   onPredict,
+  onUpdate,
 }: PatientListProps) {
   if (patients.length === 0) {
     return (
@@ -34,6 +36,7 @@ export default function PatientList({
           onEdit={() => onEdit(patient)}
           onDelete={() => onDelete(patient._id)}
           onPredict={() => onPredict(patient._id)}
+          onUpdate={onUpdate}
         />
       ))}
     </div>
