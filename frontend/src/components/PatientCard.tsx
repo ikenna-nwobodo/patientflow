@@ -221,14 +221,14 @@ export default function PatientCard({
       </div>
 
       {/* Notes */}
-      {patient.notes && (
+      {/* {patient.notes && (
         <div className="mb-4">
           <p className="text-xs text-gray-500 mb-1">Notes</p>
           <p className="text-sm text-gray-700 bg-blue-50 p-2 rounded">
             {patient.notes}
           </p>
         </div>
-      )}
+      )} */}
 
       {/* Actions */}
       <div className="flex gap-2">
