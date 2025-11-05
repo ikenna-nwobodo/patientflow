@@ -115,26 +115,53 @@ export async function predictDischarge(req, res, next) {
     const diffTime = Math.abs(end - patient.admissionDate);
     const lengthOfStay = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    const mlServoceUrl = process.env.ML_SERVICE_URL || "http://127.0.0.1:5001";
+    const mlServiceUrl = process.env.ML_SERVICE_URL || "http://127.0.0.1:5001";
 
-    console.log("Calling ML Service:", mlServoceUrl);
+    console.log("Calling ML Service:", mlServiceUrl);
 
     const payload = {
       age: patient.age,
       diagnosis: patient.diagnosis,
       temperature: parseFloat(patient.vitalSigns.temperature),
       heartRate: parseInt(patient.vitalSigns.heartRate),
-      lengthOfStay: patient.lengthOfStay,
+      lengthOfStay: lengthOfStay,
     };
 
     console.log("Payload sent to ML Service:", payload);
 
-    const response = await axios.post(`${mlServoceUrl}/predict`, payload, {
-      timeout: 5000,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    // retry logic
+    let response;
+    let retries = 3;
+
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        response = await axios.post(`${mlServiceUrl}/predict`, payload, {
+          timeout: 30000, // increase timeout
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        break;
+      } catch (error) {
+        if (error.response?.status === 429 && attempt < retries - 1) {
+          console.log(
+            `Rate limited, retrying in ${(attempt + 1) * 2} seconds...`
+          );
+          await new Promise((resolve) =>
+            setTimeout(resolve, (attempt + 1) * 2000)
+          ); // increment wait time
+          continue;
+        }
+        throw error;
+      }
+    }
+
+    // const response = await axios.post(`${mlServiceUrl}/predict`, payload, {
+    //   timeout: 5000,
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    // });
 
     console.log("ML Service Response:", response.data);
 
@@ -156,9 +183,16 @@ export async function predictDischarge(req, res, next) {
       status: error.response?.status,
     });
 
+    let errorMessage = "Could not get prediction. ML service may be down.";
+    if (error.response?.status === 429) {
+      errorMessage =
+        "ML service is rate limited. Please try again in a moment.";
+    }
+
     res.status(500).json({
       success: false,
-      message: "Could not get prediction. ML service may be down.",
+      message: errorMessage,
+      error: error.response?.data || error.message,
     });
   }
 }

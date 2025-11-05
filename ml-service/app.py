@@ -23,7 +23,7 @@ def predict():
     try:
         data = request.get_json()
         
-        # Validate required fields
+        # validate required fields
         required_fields = ['age', 'lengthOfStay', 'temperature', 'heartRate', 'diagnosis']
         for field in required_fields:
             if field not in data:
@@ -31,7 +31,7 @@ def predict():
                     'error': f'Missing required field: {field}'
                 }), 400
         
-        # Get prediction
+        # get prediction
         score, recommendation = predict_discharge_readiness(
             age=data['age'],
             length_of_stay=data['lengthOfStay'],
